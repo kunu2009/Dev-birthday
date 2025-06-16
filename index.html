@@ -182,11 +182,12 @@
             // --- Configuration ---
             
             // ** IMPORTANT **
-            // The first two images are now local files from your 'images' folder.
+            // The first two images are local files. Just place them in the
+            // same folder as this HTML file.
             // The rest are placeholders. You can add more local images if you like!
             const imageUrls = [
-                "images/photo1.jpg", // Your local image
-                "images/photo2.jpg", // Your second local image
+                "photo1.jpg", // Your local image
+                "photo2.jpg", // Your second local image
                 "https://placehold.co/400x550/0f3460/ffffff?text=More+Memories",
                 "https://placehold.co/600x400/ff7eb9/000000?text=Good+Times",
                 "https://placehold.co/450x650/f8c5d8/000000?text=So+Cool",
@@ -243,11 +244,11 @@
                     img.onerror = function() {
                         // Fallback in case an image fails to load
                         this.onerror=null; // prevents infinite loop
-                        // For local files, this will show a broken image icon, which is okay.
-                        // For remote files, we can show a placeholder.
-                        if (!this.src.startsWith('images/')) {
+                        // If it's a remote placeholder URL that failed, show an error image.
+                        if (this.src.startsWith('http')) {
                             this.src='https://placehold.co/400x400/ff0000/ffffff?text=Image+Error';
                         }
+                        // For local files, this will just show a broken image icon.
                         gridItem.style.gridRowEnd = `span 15`;
                     };
                     
