@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Dev!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a2e;
+            background-image: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            overflow-x: hidden;
+        }
+
+        .font-dancing {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* --- Collage Grid --- */
+        #collage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-auto-rows: 20px;
+            gap: 10px;
+        }
+
+        .grid-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid-item:hover {
+            box-shadow: 0 15px 30px rgba(224, 86, 142, 0.5);
+            transform: scale(1.05) !important; /* !important to override JS */
+            z-index: 10;
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+
+        .grid-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        /* --- Birthday Title --- */
+        #birthday-title {
+            text-shadow: 0 0 10px #e0568e, 0 0 20px #e0568e, 0 0 40px #e0568e, 0 0 60px #e0568e, 2px 2px 2px rgba(0,0,0,0.5);
+            animation: pulse-glow 2.5s infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from {
+                text-shadow: 0 0 10px #e0568e, 0 0 20px #e0568e, 0 0 30px #e0568e, 2px 2px 2px rgba(0,0,0,0.5);
+            }
+            to {
+                text-shadow: 0 0 20px #ff7eb9, 0 0 30px #ff7eb9, 0 0 50px #ff7eb9, 2px 2px 2px rgba(0,0,0,0.5);
+            }
+        }
+
+        /* --- Lightbox Modal --- */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        #lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        #lightbox img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        #lightbox.active img {
+             transform: scale(1);
+        }
+
+        .lightbox-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        #close-btn { top: 20px; right: 20px; font-size: 1.5rem; }
+        #prev-btn { left: 20px; }
+        #next-btn { right: 20px; }
+        
+        /* --- Confetti --- */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="text-white relative min-h-screen">
+
+    <!-- Main Content Container -->
+    <div class="container mx-auto px-4 py-8 md:py-16">
+        
+        <!-- Animated Birthday Title -->
+        <h1 id="birthday-title" class="font-dancing text-6xl md:text-8xl text-center mb-12 text-white">Happy Birthday Dev</h1>
+        
+        <!-- Interactive Collage Grid -->
+        <div id="collage-grid" class="w-full max-w-7xl mx-auto">
+            <!-- Images will be injected here by JavaScript -->
+        </div>
+
+    </div>
+
+    <!-- Lightbox/Modal for fullscreen image view -->
+    <div id="lightbox">
+        <button id="close-btn" class="lightbox-btn">&times;</button>
+        <button id="prev-btn" class="lightbox-btn">&larr;</button>
+        <button id="next-btn" class="lightbox-btn">&rarr;</button>
+        <img id="lightbox-img" src="" alt="Enlarged view">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Configuration ---
+            
+            // ** IMPORTANT **
+            // The first two images are now local files from your 'images' folder.
+            // The rest are placeholders. You can add more local images if you like!
+            const imageUrls = [
+                "images/photo1.jpg", // Your local image
+                "images/photo2.jpg", // Your second local image
+                "https://placehold.co/400x550/0f3460/ffffff?text=More+Memories",
+                "https://placehold.co/600x400/ff7eb9/000000?text=Good+Times",
+                "https://placehold.co/450x650/f8c5d8/000000?text=So+Cool",
+                "https://placehold.co/500x450/e0568e/ffffff?text=Cheers!"
+            ];
+
+
+            // --- DOM Elements ---
+            const collageGrid = document.getElementById('collage-grid');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const closeBtn = document.getElementById('close-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            let currentImageIndex = 0;
+
+            // --- Functions ---
+
+            /**
+             * Shuffles array in place.
+             * @param {Array} array An array containing the items.
+             */
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+            
+            /**
+             * Creates and populates the collage grid with images.
+             */
+            function createCollage() {
+                shuffle(imageUrls); // Randomize image order for a new look each time
+                imageUrls.forEach((url, index) => {
+                    const gridItem = document.createElement('div');
+                    gridItem.className = 'grid-item';
+                    gridItem.style.animationDelay = `${index * 100}ms`;
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = `Collage image ${index + 1}`;
+                    img.loading = 'lazy'; // Improve performance
+                    
+                    img.crossOrigin = "anonymous";
+
+                    img.onload = () => {
+                        // Masonry layout: Adjust grid-row-end based on image height
+                        const rowSpan = Math.ceil((img.naturalHeight / img.naturalWidth * (gridItem.clientWidth / 20)));
+                        gridItem.style.gridRowEnd = `span ${rowSpan}`;
+                    };
+
+                    img.onerror = function() {
+                        // Fallback in case an image fails to load
+                        this.onerror=null; // prevents infinite loop
+                        // For local files, this will show a broken image icon, which is okay.
+                        // For remote files, we can show a placeholder.
+                        if (!this.src.startsWith('images/')) {
+                            this.src='https://placehold.co/400x400/ff0000/ffffff?text=Image+Error';
+                        }
+                        gridItem.style.gridRowEnd = `span 15`;
+                    };
+                    
+                    gridItem.addEventListener('click', () => openLightbox(index));
+                    
+                    gridItem.appendChild(img);
+                    collageGrid.appendChild(gridItem);
+                });
+            }
+
+            /**
+             * Opens the lightbox with the selected image.
+             * @param {number} index - The index of the image in the imageUrls array.
+             */
+            function openLightbox(index) {
+                currentImageIndex = index;
+                lightboxImg.src = imageUrls[currentImageIndex];
+                lightbox.classList.add('active');
+            }
+
+            /**
+             * Closes the lightbox.
+             */
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+            }
+
+            /**
+             * Shows the next image in the lightbox.
+             */
+            function showNextImage() {
+                currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+                lightboxImg.src = imageUrls[currentImageIndex];
+            }
+
+            /**
+             * Shows the previous image in the lightbox.
+             */
+            function showPrevImage() {
+                currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+                lightboxImg.src = imageUrls[currentImageIndex];
+            }
+
+            // --- Confetti Effect ---
+            function createConfetti() {
+                const confettiCount = 150;
+                const colors = ['#e0568e', '#ff7eb9', '#f8c5d8', '#ffffff', '#0f3460'];
+
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    confetti.style.top = `${-20 - Math.random() * 100}px`; // Start above screen
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    
+                    const animationDuration = 5 + Math.random() * 5; // 5 to 10 seconds
+                    const animationDelay = Math.random() * 5; // 0 to 5 seconds
+                    
+                    confetti.animate([
+                        { transform: `translateY(0) rotate(${Math.random() * 360}deg)`, opacity: 1 },
+                        { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360 * 5}deg)`, opacity: 0 }
+                    ], {
+                        duration: animationDuration * 1000,
+                        delay: animationDelay * 1000,
+                        easing: 'linear',
+                        iterations: Infinity
+                    });
+
+                    document.body.appendChild(confetti);
+                }
+            }
+            
+            // --- Event Listeners ---
+            closeBtn.addEventListener('click', closeLightbox);
+            nextBtn.addEventListener('click', showNextImage);
+            prevBtn.addEventListener('click', showPrevImage);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) { // Close only if clicking the background
+                    closeLightbox();
+                }
+            });
+
+            // Keyboard navigation for the lightbox
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowRight') showNextImage();
+                if (e.key === 'ArrowLeft') showPrevImage();
+            });
+            
+            // Recalculate masonry on window resize
+            window.addEventListener('resize', () => {
+                const gridItems = document.querySelectorAll('.grid-item');
+                gridItems.forEach(item => {
+                    const img = item.querySelector('img');
+                    if (img && img.naturalHeight) {
+                        const rowSpan = Math.ceil((img.naturalHeight / img.naturalWidth * (item.clientWidth / 20)));
+                        item.style.gridRowEnd = `span ${rowSpan}`;
+                    }
+                });
+            });
+
+
+            // --- Initialization ---
+            createCollage();
+            createConfetti();
+        });
+    </script>
+</body>
+</html>
+
